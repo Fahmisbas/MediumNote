@@ -1,9 +1,11 @@
 package com.fahmisbas.mediumnote;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -52,13 +54,7 @@ public class MainActivity extends AppCompatActivity {
         notesAdapter.setOnItemLongClickCallback(new NotesAdapter.OnItemLongClickCallback() {
             @Override
             public void onItemLongClick(int position) {
-                userNotes.remove(position);
-                notesAdapter.notifyDataSetChanged();
-
-                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("com.fahmisbas.mediumnote", MODE_PRIVATE);
-                Gson gson = new Gson();
-                String json = gson.toJson(MainActivity.userNotes);
-                sharedPreferences.edit().putString("list", json).apply();
+                openDialog(position);
             }
         });
 
@@ -71,6 +67,28 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void openDialog(int position) {
+        final int itemSlected = position;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Delete This Item")
+                .setMessage("Are you sure you want to delete this?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        userNotes.remove(itemSlected);
+                        notesAdapter.notifyDataSetChanged();
+
+                        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("com.fahmisbas.mediumnote", MODE_PRIVATE);
+                        Gson gson = new Gson();
+                        String json = gson.toJson(MainActivity.userNotes);
+                        sharedPreferences.edit().putString("list", json).apply();
+                    }
+                })
+                .setNegativeButton("No",null);
+        builder.show();
     }
 
     @Override
